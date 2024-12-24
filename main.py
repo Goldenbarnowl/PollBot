@@ -5,8 +5,13 @@ import sys
 from aiogram.methods import DeleteWebhook
 
 from config import dp, bot
+from src.routers.pupil_handlers import pupil_router
+from src.routers.user_handlers import user_router
+
 
 async def start():
+    dp.include_router(user_router)
+    dp.include_router(pupil_router)
     try:
         await bot(DeleteWebhook(drop_pending_updates=True))
         await dp.start_polling(bot)
