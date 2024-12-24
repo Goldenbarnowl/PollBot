@@ -4,9 +4,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from config import pupil_data_repo, bot
-from phrases import PUPIL_AGE, PUPIL_ERROR_AGE, SCHOOL_TYPE, SCHOOL_REQUEST, ERROR_SCHOOL
+from phrases import PUPIL_AGE, PUPIL_ERROR_AGE, SCHOOL_TYPE, SCHOOL_REQUEST, ERROR_SCHOOL, GRADE_REQUEST, ERROR_GRADE, \
+    EXAM_REQUEST
 from src.keyboards.pupil_keyboard import pupil_age_keyboard, pupil_school_type_keyboard, school_types_buttons, \
-    lyceum_keyboard, gymnasium_keyboard, school_keyboard, school_buttons, gymnasium_buttons, lyceum_buttons
+    lyceum_keyboard, gymnasium_keyboard, school_keyboard, school_buttons, gymnasium_buttons, lyceum_buttons, \
+    grade_keyboard, request_keyboard
 from src.keyboards.user_keyboards import role_buttons
 from src.states.pupil_states import Pupil
 from src.states.user_states import User
@@ -104,12 +106,13 @@ async def handle_pupil_school(message: Message, state: FSMContext):
 
     if (school in school_buttons) or (school in gymnasium_buttons) or (school in lyceum_buttons):
 
+        await state.set_state(Pupil.wait_grade)
         pupil_data_repo.update_field(chat_id, "school", school)
-
 
         await bot.send_message(
             chat_id=chat_id,
-            text="Спасибо за регистрацию!"
+            text=GRADE_REQUEST,
+            reply_markup=grade_keyboard()
         )
 
     else:
@@ -117,3 +120,34 @@ async def handle_pupil_school(message: Message, state: FSMContext):
             chat_id=chat_id,
             text=ERROR_SCHOOL
         )
+
+
+@pupil_router.message(StateFilter(Pupil.wait_grade))
+async def handle_pupil_grade(message: Message, state: FSMContext):
+    """Обрабатывает класс в школе пользователя - ученик"""
+
+    chat_id = message.chat.id
+    grade = message.text
+
+    try:
+        grade = int(grade)
+        if (grade > 0) and (grade < 12):
+            pupil_data_repo.update_field(chat_id, "grade", grade)
+        else:
+            raise ValueError
+        await state.set_state(Pupil.wait_exam)
+        if grade > 9:
+            exam = "ЕГЭ"
+        else:
+            exam = "ОГЭ"
+        await bot.send_message(
+            chat_id=chat_id,
+            text=EXAM_REQUEST+exam,
+            reply_markup=request_keyboard()
+        )
+    except:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=ERROR_GRADE
+        )
+

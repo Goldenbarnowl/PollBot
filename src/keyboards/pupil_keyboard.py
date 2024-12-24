@@ -202,3 +202,22 @@ def school_keyboard():
         button = KeyboardButton(text=school)
         school_keyboard_builder.row(button)
     return school_keyboard_builder.as_markup(resize_keyboard=True, is_persistent=True)
+
+
+def grade_keyboard():
+    grade_keyboard_builder = ReplyKeyboardBuilder()
+    for grade in range(1, 12):
+        button = KeyboardButton(text=str(grade))
+        if grade in [6]:
+            grade_keyboard_builder.row(button)
+        else:
+            grade_keyboard_builder.add(button)
+    return grade_keyboard_builder.as_markup(resize_keyboard=True, is_persistent=True)
+
+
+def request_keyboard():
+    request_keyboard_builder = ReplyKeyboardBuilder()
+    for request in ["✅ Да", "❌ Нет"]:
+        button = KeyboardButton(text=request)
+        request_keyboard_builder.row(button)
+    return request_keyboard_builder.as_markup(resize_keyboard=True, is_persistent=True)
