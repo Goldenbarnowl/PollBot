@@ -4,8 +4,9 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from config import pupil_data_repo, bot
-from phrases import PUPIL_AGE, PUPIL_ERROR_AGE, SCHOOL_TYPE
-from src.keyboards.pupil_keyboard import pupil_age_keyboard, pupil_school_type_keyboard
+from phrases import PUPIL_AGE, PUPIL_ERROR_AGE, SCHOOL_TYPE, SCHOOL_REQUEST, ERROR_SCHOOL
+from src.keyboards.pupil_keyboard import pupil_age_keyboard, pupil_school_type_keyboard, school_types_buttons, \
+    lyceum_keyboard, gymnasium_keyboard, school_keyboard, school_buttons, gymnasium_buttons, lyceum_buttons
 from src.keyboards.user_keyboards import role_buttons
 from src.states.pupil_states import Pupil
 from src.states.user_states import User
@@ -49,6 +50,7 @@ async def handle_pupil_age(message: Message, state: FSMContext):
         else:
             raise ValueError
 
+        await state.set_state(Pupil.wait_school_type)
         await bot.send_message(
             chat_id=chat_id,
             text=SCHOOL_TYPE,
@@ -59,4 +61,59 @@ async def handle_pupil_age(message: Message, state: FSMContext):
         await bot.send_message(
             chat_id=chat_id,
             text=PUPIL_ERROR_AGE
+        )
+
+
+@pupil_router.message(StateFilter(Pupil.wait_school_type), F.text.in_([school_types_buttons['school'], school_types_buttons['lyceum'], school_types_buttons['gymnasium']]))
+async def handle_pupil_school_type(message: Message, state: FSMContext):
+    """Обрабатывает тип школы пользователя - ученик"""
+
+    await state.set_state(Pupil.wait_school)
+
+    chat_id = message.chat.id
+    school_type = message.text
+
+    if school_type == school_types_buttons['school']:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=SCHOOL_REQUEST,
+            reply_markup=school_keyboard()
+        )
+
+    elif school_type == school_types_buttons['lyceum']:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=SCHOOL_REQUEST,
+            reply_markup=lyceum_keyboard()
+        )
+
+    elif school_type == school_types_buttons['gymnasium']:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=SCHOOL_REQUEST,
+            reply_markup=gymnasium_keyboard()
+        )
+
+
+@pupil_router.message(StateFilter(Pupil.wait_school))
+async def handle_pupil_school(message: Message, state: FSMContext):
+    """Обрабатывает учебное заведение пользователя - ученик"""
+
+    chat_id = message.chat.id
+    school = message.text
+
+    if (school in school_buttons) or (school in gymnasium_buttons) or (school in lyceum_buttons):
+
+        pupil_data_repo.update_field(chat_id, "school", school)
+
+
+        await bot.send_message(
+            chat_id=chat_id,
+            text="Спасибо за регистрацию!"
+        )
+
+    else:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=ERROR_SCHOOL
         )
