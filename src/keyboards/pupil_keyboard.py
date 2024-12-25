@@ -222,7 +222,7 @@ def request_keyboard():
     request_keyboard_builder = ReplyKeyboardBuilder()
     for request in answer_buttons:
         button = KeyboardButton(text=request)
-        request_keyboard_builder.row(button)
+        request_keyboard_builder.add(button)
     return request_keyboard_builder.as_markup(resize_keyboard=True, is_persistent=True)
 
 

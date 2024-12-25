@@ -4,6 +4,8 @@ from aiogram.client.default import DefaultBotProperties
 from pydantic_settings import BaseSettings
 from supabase import Client, create_client
 
+from src.repo.PChildrenDataRepo import PChildrenDataRepository
+from src.repo.ParentDataRepo import ParentDataRepository
 from src.repo.PupilDataRepo import PupilDataRepository
 from src.repo.UserDataRepo import UserDataRepository
 
@@ -30,6 +32,8 @@ supabase: Client = create_client(url, key)
 
 users_data_repo = UserDataRepository(supabase)
 pupil_data_repo = PupilDataRepository(supabase)
+parent_data_repo = ParentDataRepository(supabase)
+pchildren_data_repo = PChildrenDataRepository(supabase)
 
 # Инициализация бота
 default = DefaultBotProperties(parse_mode='HTML', protect_content=False)
