@@ -1,5 +1,5 @@
-from aiogram.types import KeyboardButton
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram.types import KeyboardButton, InlineKeyboardButton
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 school_types_buttons = {"school": "🏫 Школа", "lyceum": "🏫 Лицей", "gymnasium": "🏫 Гимназия"}
 
@@ -215,9 +215,112 @@ def grade_keyboard():
     return grade_keyboard_builder.as_markup(resize_keyboard=True, is_persistent=True)
 
 
+answer_buttons = ["✅ Да", "❌ Нет"]
+
+
 def request_keyboard():
     request_keyboard_builder = ReplyKeyboardBuilder()
-    for request in ["✅ Да", "❌ Нет"]:
+    for request in answer_buttons:
         button = KeyboardButton(text=request)
         request_keyboard_builder.row(button)
     return request_keyboard_builder.as_markup(resize_keyboard=True, is_persistent=True)
+
+
+university_list = [
+    "Омский государственный технический университет",  # ОмГТУ
+    "Омский государственный университет им. Ф.М. Достоевского",  # ОмГУ
+    "Омский государственный педагогический университет",  # ОмГПУ
+    "Сибирский государственный автомобильно-дорожный университет",  # СибАДИ
+    "Омский государственный аграрный университет им. П.А. Столыпина",  # ОмГАУ
+    "Омский государственный медицинский университет",  # ОмГМУ
+    "Омский государственный университет путей сообщения",  # ОмГУПС
+    "Сибирский государственный университет физической культуры и спорта",  # СибГУФК
+    "Омская юридическая академия",  # ОмЮА
+    "Омская гуманитарная академия",  # ОмГА
+    "Омский авиационный колледж им. Н.Е. Жуковского",
+    "Омский колледж отраслевых технологий строительства и транспорта",
+    "Сибирский профессиональный колледж",
+    "Омский технологический колледж",
+    "Омский музыкально-педагогический колледж",
+    "Сибирский многопрофильный колледж «Перспектива»",
+    "Международный технологический колледж Российского биотехнологического университета",
+    "Омский филиал Московского международного колледжа цифровых технологий «Академия ТОП»",
+    "Колледж инновационных технологий, экономики и коммерции",
+    "Омский колледж профессиональных технологий",
+    "Нет в списке"
+]
+
+next_button = {"next": "➡️ Продолжить"}
+
+
+def university_keyboard(check_list):
+    university_keyboard_builder = InlineKeyboardBuilder()
+    for n in range(len(university_list)):
+        if n in check_list:
+            button = InlineKeyboardButton(text="✅ " + university_list[n], callback_data=str(n))
+            university_keyboard_builder.row(button)
+        else:
+            button = InlineKeyboardButton(text=university_list[n], callback_data=str(n))
+            university_keyboard_builder.row(button)
+    button = InlineKeyboardButton(text=next_button["next"], callback_data="next")
+    university_keyboard_builder.row(button)
+    return university_keyboard_builder.as_markup(resize_keyboard=True)
+
+
+answer_q3 = ["Очень часто", "Иногда", "Редко", "Не интересуюсь"]
+
+
+def keyboard_q3():
+    keyboard_builder = ReplyKeyboardBuilder()
+    for answer in answer_q3:
+        button = KeyboardButton(text=answer)
+        keyboard_builder.row(button)
+    return keyboard_builder.as_markup(resize_keyboard=True, is_persistent=True)
+
+
+# Функция для создания клавиатуры для вопроса 2
+answer_q4 = ["Да, с удовольствием", "Если будет интересно", "Скорее нет", "Нет"]
+
+
+def keyboard_q4():
+    keyboard_builder = ReplyKeyboardBuilder()
+    for answer in answer_q4:
+        button = KeyboardButton(text=answer)
+        keyboard_builder.row(button)
+    return keyboard_builder.as_markup(resize_keyboard=True, is_persistent=True)
+
+
+# Функция для создания клавиатуры для вопроса 5 (любимый язык программирования)
+answer_q5 = [
+    "Python",
+    "JavaScript",
+    "C++",
+    "Scratch",
+    "У меня пока нет любимого языка"
+]
+
+
+def keyboard_q5():
+    keyboard_builder = ReplyKeyboardBuilder()
+    for answer in answer_q5:
+        button = KeyboardButton(text=answer)
+        keyboard_builder.row(button)
+    return keyboard_builder.as_markup(resize_keyboard=True, is_persistent=True)
+
+
+answer_q6 = [
+    "Создание игры",
+    "Разработка мобильного приложения",
+    "Разработка робота",
+    "Создание веб-сайта",
+    "Не знаю, но хотел(а) бы научиться"
+]
+
+
+def keyboard_q6():
+    keyboard_builder = ReplyKeyboardBuilder()
+    for answer in answer_q6:
+        button = KeyboardButton(text=answer)
+        keyboard_builder.row(button)
+    return keyboard_builder.as_markup(resize_keyboard=True, is_persistent=True)
+

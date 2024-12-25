@@ -1,14 +1,16 @@
 from aiogram import Router, F
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 
 from config import pupil_data_repo, bot
 from phrases import PUPIL_AGE, PUPIL_ERROR_AGE, SCHOOL_TYPE, SCHOOL_REQUEST, ERROR_SCHOOL, GRADE_REQUEST, ERROR_GRADE, \
-    EXAM_REQUEST
+    EXAM_REQUEST, UNIVERSITY_REQUEST, ERROR_BUTTON, UNIVERSITY_LIST_REQUEST, GUIDE_UNIVERSITY, ERROR_UNIVERSITY, \
+    PUPIL_Q1, PUPIL_Q2, PUPIL_Q3, PUPIL_Q4, PUPIL_Q5, PUPIL_Q6, PUPIL_THX
 from src.keyboards.pupil_keyboard import pupil_age_keyboard, pupil_school_type_keyboard, school_types_buttons, \
     lyceum_keyboard, gymnasium_keyboard, school_keyboard, school_buttons, gymnasium_buttons, lyceum_buttons, \
-    grade_keyboard, request_keyboard
+    grade_keyboard, request_keyboard, answer_buttons, university_keyboard, university_list, keyboard_q3, keyboard_q5, \
+    keyboard_q6, answer_q3, keyboard_q4, answer_q4, answer_q5, answer_q6
 from src.keyboards.user_keyboards import role_buttons
 from src.states.pupil_states import Pupil
 from src.states.user_states import User
@@ -137,9 +139,9 @@ async def handle_pupil_grade(message: Message, state: FSMContext):
             raise ValueError
         await state.set_state(Pupil.wait_exam)
         if grade > 9:
-            exam = "ЕГЭ"
+            exam = "ЕГЭ по информатике?"
         else:
-            exam = "ОГЭ"
+            exam = "ОГЭ по информатике?"
         await bot.send_message(
             chat_id=chat_id,
             text=EXAM_REQUEST+exam,
@@ -151,3 +153,233 @@ async def handle_pupil_grade(message: Message, state: FSMContext):
             text=ERROR_GRADE
         )
 
+
+@pupil_router.message(StateFilter(Pupil.wait_exam))
+async def handle_pupil_exam(message: Message, state: FSMContext):
+    """Обрабатывает вопрос о сдаче экзамена пользователя - ученик"""
+
+    chat_id = message.chat.id
+    exam = message.text
+    if exam in answer_buttons:
+        await state.set_state(Pupil.wait_arrival)
+        pupil_data_repo.update_field(chat_id, "exam", exam)
+        await bot.send_message(
+            chat_id=chat_id,
+            text=UNIVERSITY_REQUEST,
+            reply_markup=request_keyboard()
+        )
+
+    else:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=ERROR_BUTTON
+        )
+
+
+@pupil_router.message(StateFilter(Pupil.wait_arrival))
+async def handle_pupil_university(message: Message, state: FSMContext):
+    """Обрабатывает вопрос о поступлении в ВУЗ - ученик"""
+
+    chat_id = message.chat.id
+    arrival = message.text
+    if arrival in answer_buttons:
+        pupil_data_repo.update_field(chat_id, "arrival", arrival)
+        if arrival == answer_buttons[0]:
+            await state.set_state(Pupil.wait_university)
+            await state.update_data(check_list=set())
+            await bot.send_message(
+                chat_id=chat_id,
+                text=UNIVERSITY_LIST_REQUEST,
+                reply_markup=ReplyKeyboardRemove()
+            )
+            await bot.send_message(
+                chat_id=chat_id,
+                text=GUIDE_UNIVERSITY,
+                reply_markup=university_keyboard(set())
+            )
+        else:
+            await state.set_state(Pupil.wait_q2)
+            await bot.send_message(
+                chat_id=chat_id,
+                text=PUPIL_Q2,
+                reply_markup=request_keyboard()
+            )
+    else:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=ERROR_BUTTON
+        )
+
+@pupil_router.callback_query(StateFilter(Pupil.wait_university), F.data == "next")
+async def handle_check_university_next(callback: CallbackQuery, state: FSMContext):
+    chat_id = callback.message.chat.id
+    try:
+        state_data = await state.get_data()
+        check_list = state_data['check_list']
+    except:
+        check_list = set()
+    if len(check_list) == 0:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=ERROR_UNIVERSITY
+        )
+    else:
+        await state.set_state(Pupil.wait_q1)
+        data_base_university = ""
+        for i in range(len(university_list)):
+            if i in check_list:
+                data_base_university += university_list[i]+"; "
+        pupil_data_repo.update_field(chat_id, "university", data_base_university)
+        await bot.edit_message_text(
+            chat_id=chat_id,
+            text="Вы выбрали:\n"+data_base_university,
+            message_id=callback.message.message_id,
+            reply_markup=None
+        )
+        await bot.send_message(
+            chat_id=chat_id,
+            text=PUPIL_Q1,
+            reply_markup=request_keyboard()
+        )
+
+
+@pupil_router.callback_query(StateFilter(Pupil.wait_university))
+async def handle_check_university(callback: CallbackQuery, state: FSMContext):
+    chat_id = callback.message.chat.id
+    university = callback.data
+    try:
+        state_data = await state.get_data()
+        check_list = state_data['check_list']
+    except:
+        check_list = set()
+    if int(university) in check_list:
+        check_list.remove(int(university))
+    else:
+        check_list.add(int(university))
+    await bot.edit_message_reply_markup(
+        chat_id=chat_id,
+        message_id=callback.message.message_id,
+        reply_markup=university_keyboard(check_list)
+    )
+
+
+@pupil_router.message(StateFilter(Pupil.wait_q1))
+async def handle_pupil_q1(message: Message, state: FSMContext):
+    """Планируете поступление на техническую специальность - ученик"""
+
+    chat_id = message.chat.id
+    answer = message.text
+    if answer in answer_buttons:
+        await state.set_state(Pupil.wait_q2)
+        pupil_data_repo.update_field(chat_id, "technical_specialty", answer)
+        await bot.send_message(
+            chat_id=chat_id,
+            text=PUPIL_Q2,
+            reply_markup=request_keyboard()
+        )
+
+    else:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=ERROR_BUTTON
+        )
+
+
+@pupil_router.message(StateFilter(Pupil.wait_q2))
+async def handle_pupil_q2(message: Message, state: FSMContext):
+    chat_id = message.chat.id
+    answer = message.text
+    if answer in answer_buttons:
+        await state.set_state(Pupil.wait_q3)
+        pupil_data_repo.update_field(chat_id, "IT_live", answer)
+        await bot.send_message(
+            chat_id=chat_id,
+            text=PUPIL_Q3,
+            reply_markup=keyboard_q3()
+        )
+
+    else:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=ERROR_BUTTON
+        )
+
+
+@pupil_router.message(StateFilter(Pupil.wait_q3))
+async def handle_pupil_q3(message: Message, state: FSMContext):
+    chat_id = message.chat.id
+    answer = message.text
+    if answer in answer_q3:
+        await state.set_state(Pupil.wait_q4)
+        pupil_data_repo.update_field(chat_id, "interested_IT", answer)
+        await bot.send_message(
+            chat_id=chat_id,
+            text=PUPIL_Q4,
+            reply_markup=keyboard_q4()
+        )
+
+    else:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=ERROR_BUTTON
+        )
+
+
+@pupil_router.message(StateFilter(Pupil.wait_q4))
+async def handle_pupil_q4(message: Message, state: FSMContext):
+    chat_id = message.chat.id
+    answer = message.text
+    if answer in answer_q4:
+        await state.set_state(Pupil.wait_q5)
+        pupil_data_repo.update_field(chat_id, "learn_IT", answer)
+        await bot.send_message(
+            chat_id=chat_id,
+            text=PUPIL_Q5,
+            reply_markup=keyboard_q5()
+        )
+
+    else:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=ERROR_BUTTON
+        )
+
+
+@pupil_router.message(StateFilter(Pupil.wait_q5))
+async def handle_pupil_q5(message: Message, state: FSMContext):
+    chat_id = message.chat.id
+    answer = message.text
+    if answer in answer_q5:
+        await state.set_state(Pupil.wait_q6)
+        pupil_data_repo.update_field(chat_id, "make_IT", answer)
+        await bot.send_message(
+            chat_id=chat_id,
+            text=PUPIL_Q6,
+            reply_markup=keyboard_q6()
+        )
+
+    else:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=ERROR_BUTTON
+        )
+
+
+@pupil_router.message(StateFilter(Pupil.wait_q6))
+async def handle_pupil_q5(message: Message, state: FSMContext):
+    chat_id = message.chat.id
+    answer = message.text
+    if answer in answer_q6:
+        await state.set_state(Pupil.end)
+        pupil_data_repo.update_field(chat_id, "project_IT", answer)
+        await bot.send_message(
+            chat_id=chat_id,
+            text=PUPIL_THX,
+            reply_markup=ReplyKeyboardRemove()
+        )
+
+    else:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=ERROR_BUTTON
+        )
