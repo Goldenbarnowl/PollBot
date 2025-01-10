@@ -1,6 +1,7 @@
 from aiogram import Bot
 from aiogram import Dispatcher
 from aiogram.client.default import DefaultBotProperties
+from aiogram.fsm.storage.redis import RedisStorage
 from pydantic_settings import BaseSettings
 from supabase import Client, create_client
 
@@ -15,11 +16,11 @@ class Secrets(BaseSettings):
     admin_id: int
     supabase_url: str
     supabase_key: str
+    redis_url: str
 
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
-
 
 secrets = Secrets()
 
@@ -38,4 +39,5 @@ pchildren_data_repo = PChildrenDataRepository(supabase)
 # Инициализация бота
 default = DefaultBotProperties(parse_mode='HTML', protect_content=False)
 bot = Bot(token=secrets.token, default=default)
-dp = Dispatcher()
+storage = RedisStorage.from_url(secrets.redis_url)
+dp = Dispatcher(storege=storage)
