@@ -4,17 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bbb4328d-87fb-4035-a948-e27d617207e4" name="Changes" comment="Redis test">
+    <list default="true" id="bbb4328d-87fb-4035-a948-e27d617207e4" name="Changes" comment="Redis v2">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/phrases.py" beforeDir="false" afterPath="$PROJECT_DIR$/phrases.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/keyboards/parent_keyboards.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/keyboards/parent_keyboards.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/keyboards/pupil_keyboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/keyboards/pupil_keyboard.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/repo/PChildrenDataRepo.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/repo/PChildrenDataRepo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/routers/last_stand.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/routers/last_stand.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/routers/parent_handlers.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/routers/parent_handlers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/routers/pupil_handlers.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/routers/pupil_handlers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/states/parent_states.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/states/parent_states.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/routers/user_handlers.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/routers/user_handlers.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,7 +100,15 @@
       <option name="project" value="LOCAL" />
       <updated>1736516970102</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Redis v2">
+      <option name="closed" value="true" />
+      <created>1736926280210</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1736926280210</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -134,6 +136,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Redis test" />
-    <option name="LAST_COMMIT_MESSAGE" value="Redis test" />
+    <MESSAGE value="Redis v2" />
+    <option name="LAST_COMMIT_MESSAGE" value="Redis v2" />
   </component>
 </project>

@@ -1,7 +1,7 @@
 from aiogram import Router, F
 from aiogram.filters import CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import Message, ReplyKeyboardRemove, FSInputFile
 
 from config import bot, users_data_repo
 from phrases import PERS_DATA_REQUEST, YOU_ROLE, NAME_REQUEST, ERROR_NAME
@@ -33,9 +33,10 @@ async def command_start(message: Message, state: FSMContext):
             users_data_repo.insert_field(chat_id, 'reg_date', str(message.date))
     except:
         pass
-    await bot.send_message(
+    await bot.send_document(
         chat_id=chat_id,
-        text=PERS_DATA_REQUEST,
+        document=FSInputFile("./Политика конфиденциальности.docx.pdf"),
+        caption=PERS_DATA_REQUEST,
         reply_markup=give_phone_keyboard()
     )
 
