@@ -6,7 +6,7 @@ from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 from config import pupil_data_repo, bot
 from phrases import PUPIL_AGE, PUPIL_ERROR_AGE, SCHOOL_TYPE, SCHOOL_REQUEST, ERROR_SCHOOL, GRADE_REQUEST, ERROR_GRADE, \
     EXAM_REQUEST, UNIVERSITY_REQUEST, ERROR_BUTTON, UNIVERSITY_LIST_REQUEST, GUIDE_UNIVERSITY, ERROR_UNIVERSITY, \
-    PUPIL_Q1, PUPIL_Q2, PUPIL_Q3, PUPIL_Q4, PUPIL_Q5, PUPIL_Q6, PUPIL_THX
+    PUPIL_Q1, PUPIL_Q2, PUPIL_Q3, PUPIL_Q4, PUPIL_Q5, PUPIL_Q6, PUPIL_THX_7
 from src.keyboards.pupil_keyboard import pupil_age_keyboard, pupil_school_type_keyboard, school_types_buttons, \
     lyceum_keyboard, gymnasium_keyboard, school_keyboard, school_buttons, gymnasium_buttons, lyceum_buttons, \
     grade_keyboard, request_keyboard, answer_buttons, university_keyboard, university_list, keyboard_q3, keyboard_q5, \
@@ -97,6 +97,17 @@ async def handle_pupil_school_type(message: Message, state: FSMContext):
             text=SCHOOL_REQUEST,
             reply_markup=gymnasium_keyboard()
         )
+
+
+@pupil_router.message(StateFilter(Pupil.wait_school), F.text == school_buttons[0])
+async def handle_parent_back_school_type(message: Message, state: FSMContext):
+    chat_id = message.chat.id
+    await state.set_state(Pupil.wait_school_type)
+    await bot.send_message(
+        chat_id=chat_id,
+        text=SCHOOL_TYPE,
+        reply_markup=pupil_school_type_keyboard()
+    )
 
 
 @pupil_router.message(StateFilter(Pupil.wait_school))
@@ -374,7 +385,7 @@ async def handle_pupil_q5(message: Message, state: FSMContext):
         pupil_data_repo.update_field(chat_id, "project_IT", answer)
         await bot.send_message(
             chat_id=chat_id,
-            text=PUPIL_THX,
+            text=PUPIL_THX_7,
             reply_markup=ReplyKeyboardRemove()
         )
 

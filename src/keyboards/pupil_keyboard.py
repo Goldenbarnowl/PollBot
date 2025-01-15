@@ -24,6 +24,7 @@ def pupil_school_type_keyboard():
 
 
 lyceum_buttons = (
+    "⬅️ Назад",
     "Лицей «Бизнес и информационные технологии»",
     "Инженерно-технологический лицей № 25",
     "Лицей № 29",
@@ -47,6 +48,7 @@ def lyceum_keyboard():
     return lyceum_keyboard_builder.as_markup(resize_keyboard=True, is_persistent=True)
 
 gymnasium_buttons = (
+    "⬅️ Назад",
     "Гимназия № 9",
     "Гимназия № 12 имени Героя Советского Союза В.П. Горячева",
     "Гимназия № 19",
@@ -78,6 +80,7 @@ def gymnasium_keyboard():
 
 
 school_buttons = (
+    "⬅️ Назад",
     "Школа № 1",
     "Школа № 2",
     "Школа № 3",

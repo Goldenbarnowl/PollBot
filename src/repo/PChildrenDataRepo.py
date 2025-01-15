@@ -20,6 +20,10 @@ class PChildrenDataRepository:
         """Получить данные пользователя по chat_id"""
         return self.supabase.table("PChildren").select("*").eq("chat_id", chat_id).eq("check", False).execute()
 
+    def get_user_by_chat_id_all(self, chat_id: int) -> APIResponse[Any]:
+        """Получить данные пользователя по chat_id"""
+        return self.supabase.table("PChildren").select("*").eq("chat_id", chat_id).execute()
+
     def delete_all_user_data(self, chat_id: int):
         """Удалить все данные пользователя по chat_id"""
         self.supabase.table("PChildren").delete().eq("chat_id", chat_id).eq("check", False).execute()

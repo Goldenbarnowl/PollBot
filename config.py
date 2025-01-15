@@ -22,7 +22,13 @@ class Secrets(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
 
+
 secrets = Secrets()
+
+channel_id = -1002406861510  # -1002406861510  # Канал для проверки
+admin_group = -1002354205786  # Группа админов
+present_thread = 4  # ID треда с подарками
+group_thread = 5  # ID треда с подписками на группу
 
 # Инициализация подключения к базе данных Supabase
 url: str = secrets.supabase_url
@@ -40,4 +46,4 @@ pchildren_data_repo = PChildrenDataRepository(supabase)
 default = DefaultBotProperties(parse_mode='HTML', protect_content=False)
 bot = Bot(token=secrets.token, default=default)
 storage = RedisStorage.from_url(secrets.redis_url)
-dp = Dispatcher(storege=storage)
+dp = Dispatcher(storage=storage)

@@ -2,16 +2,19 @@ from aiogram import Router, F
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
+from aiogram.utils.markdown import hlink
 
-from config import parent_data_repo, pupil_data_repo, bot, pchildren_data_repo
+from config import parent_data_repo, pupil_data_repo, bot, pchildren_data_repo, channel_id, admin_group, group_thread, \
+    present_thread
 from phrases import PCHILDREN_NAME, ERROR_PCHILDREN, SCHOOL_TYPE, PUPIL_ERROR_AGE, PARENT_SCHOOL_TYPE, SCHOOL_REQUEST, \
     GRADE_REQUEST, ERROR_SCHOOL, EXAM_REQUEST, ERROR_GRADE, UNIVERSITY_REQUEST, ERROR_BUTTON, UNIVERSITY_LIST_REQUEST, \
-    GUIDE_UNIVERSITY, PUPIL_Q2, ERROR_UNIVERSITY, PUPIL_Q1, PUPIL_THX, PUPIL_Q6, PUPIL_Q5, PUPIL_Q4, PUPIL_Q3, \
+    GUIDE_UNIVERSITY, PUPIL_Q2, ERROR_UNIVERSITY, PUPIL_Q1, PUPIL_Q6, PUPIL_Q5, PUPIL_Q4, PUPIL_Q3, \
     PCHILDREN_AGE, PARENT_GRADE_REQUEST, PARENTS_Q2, PARENTS_Q3, NEW_CHILDREN, PARENTS_Q5, PARENTS_Q6, PARENTS_Q7, \
-    PARENTS_Q9, PARENTS_Q8, THX_PARRENTS
+    PARENTS_Q9, PARENTS_Q8, THX_PARENTS, REPEAT_PARENTS, PARENT_PRESENT, PARENT_GIVE
 from src.keyboards.parent_keyboards import new_children_keyboard, new_children_buttons, keyboard_q5_parents, \
     keyboard_q6_parents, parents_answer_q6, keyboard_q7_parents, parents_answer_q9, parents_answer_q8, \
-    keyboard_q9_parents, keyboard_q8_parents, parents_answer_q7
+    keyboard_q9_parents, keyboard_q8_parents, parents_answer_q7, keyboard_check_group_parents, check_group_buttons, \
+    keyboard_check_present_parents
 from src.keyboards.pupil_keyboard import pupil_school_type_keyboard, school_types_buttons, school_keyboard, \
     lyceum_keyboard, gymnasium_keyboard, school_buttons, gymnasium_buttons, lyceum_buttons, grade_keyboard, \
     request_keyboard, answer_buttons, university_keyboard, university_list, answer_q6, keyboard_q6, answer_q5, \
@@ -123,6 +126,17 @@ async def handle_parent_school_type(message: Message, state: FSMContext):
             text=SCHOOL_REQUEST,
             reply_markup=gymnasium_keyboard()
         )
+
+
+@parent_router.message(StateFilter(Parent.wait_school), F.text == school_buttons[0])
+async def handle_parent_back_school_type(message: Message, state: FSMContext):
+    chat_id = message.chat.id
+    await state.set_state(Parent.wait_school_type)
+    await bot.send_message(
+        chat_id=chat_id,
+        text=PARENT_SCHOOL_TYPE,
+        reply_markup=pupil_school_type_keyboard()
+    )
 
 
 @parent_router.message(StateFilter(Parent.wait_school))
@@ -370,7 +384,9 @@ async def handle_parent_q4(message: Message, state: FSMContext):
         reply_markup=ReplyKeyboardRemove()
     )
 
-#=====================================================================================================================
+
+# =====================================================================================================================
+
 
 @parent_router.message(StateFilter(Parent.wait_q4), F.text == new_children_buttons['next'])
 async def handle_parent_q4(message: Message, state: FSMContext):
@@ -450,12 +466,77 @@ async def handle_parent_q9(message: Message, state: FSMContext):
         parent_data_repo.update_field(chat_id, "useful_skills", answer)
         await bot.send_message(
             chat_id=chat_id,
-            text=THX_PARRENTS,
-            reply_markup=ReplyKeyboardRemove()
+            text=THX_PARENTS,
+            reply_markup=keyboard_check_group_parents()
         )
-        await state.clear()
+
+        await state.set_state(Parent.wait_group)
     else:
         await bot.send_message(
             chat_id=chat_id,
             text=ERROR_BUTTON
         )
+
+
+@parent_router.message(StateFilter(Parent.wait_group), F.text == check_group_buttons["present"])
+async def handle_parent_wait_group(message: Message, state: FSMContext):
+    chat_id = message.chat.id
+    # Проверяем статус пользователя в канале
+    chat_member = await bot.get_chat_member(chat_id=channel_id, user_id=chat_id)
+
+    if chat_member.status in ['member', 'administrator', 'creator']:
+        try:
+            # Отправка подарка
+            await bot.send_message(
+                chat_id=chat_id,
+                text=PARENT_PRESENT,
+                reply_markup=keyboard_check_present_parents()
+            )
+            await bot.send_message(
+                chat_id=admin_group,
+                message_thread_id=group_thread,
+                text=f"Пользователь {str(chat_id)} - @{message.from_user.username} подписался на группу!"
+            )
+            await state.set_state(Parent.wait_present)
+        except:
+            pass
+    else:
+        try:
+            await bot.send_message(chat_id=chat_id,
+                                   text=REPEAT_PARENTS
+                                   )
+        except:
+            pass
+
+
+@parent_router.message(StateFilter(Parent.wait_present), F.text == check_group_buttons["give_me"])
+async def handle_parent_wait_present(message: Message, state: FSMContext):
+    chat_id = message.chat.id
+    await bot.send_message(
+        chat_id=chat_id,
+        text=PARENT_GIVE,
+        reply_markup=ReplyKeyboardRemove()
+    )
+    await state.clear()
+    parent_data = parent_data_repo.get_user_by_chat_id(chat_id)
+    parent_data = parent_data.data[0]
+    pchildren_data = pchildren_data_repo.get_user_by_chat_id_all(chat_id)
+    pchildren_data = pchildren_data.data
+    text = f"Пользователь {str(chat_id)} - @{message.from_user.username} хочет получить подарок!\n\nДанные пользователя:\n"
+    for key, value in parent_data.items():
+        text += f"{key.replace('_', ' ').capitalize()}: {value}\n"
+    await bot.send_message(
+        chat_id=admin_group,
+        message_thread_id=present_thread,
+        text=text
+    )
+    text = "Дети:\n"
+    for pchildren in pchildren_data:
+        for key, value in pchildren.items():
+            text += f"{key.replace('_', ' ').capitalize()}: {value}\n"
+        await bot.send_message(
+            chat_id=admin_group,
+            message_thread_id=present_thread,
+            text=text
+        )
+        text = ""

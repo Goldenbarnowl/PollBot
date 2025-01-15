@@ -96,3 +96,23 @@ def keyboard_q9_parents():
         button = KeyboardButton(text=answer)
         keyboard_builder.row(button)
     return keyboard_builder.as_markup(resize_keyboard=True, is_persistent=True)
+
+
+check_group_buttons = {
+    "present": "🎁 Хочу подарок",
+    "give_me": "🎁 Забрать подарок"
+}
+
+
+def keyboard_check_group_parents():
+    keyboard_builder = ReplyKeyboardBuilder()
+    button = KeyboardButton(text=check_group_buttons["present"])
+    keyboard_builder.row(button)
+    return keyboard_builder.as_markup(resize_keyboard=True, is_persistent=True)
+
+
+def keyboard_check_present_parents():
+    keyboard_builder = ReplyKeyboardBuilder()
+    button = KeyboardButton(text=check_group_buttons["give_me"])
+    keyboard_builder.row(button)
+    return keyboard_builder.as_markup(resize_keyboard=True, is_persistent=True)

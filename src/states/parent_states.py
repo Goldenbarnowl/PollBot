@@ -19,4 +19,6 @@ class Parent(StatesGroup):
     wait_q7 = State()
     wait_q8 = State()
     wait_q9 = State()
+    wait_group = State()
+    wait_present = State()
     end = State()
