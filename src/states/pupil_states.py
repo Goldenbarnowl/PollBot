@@ -15,4 +15,6 @@ class Pupil(StatesGroup):
     wait_q4 = State()
     wait_q5 = State()
     wait_q6 = State()
+    wait_group = State()
+    wait_present = State()
     end = State()

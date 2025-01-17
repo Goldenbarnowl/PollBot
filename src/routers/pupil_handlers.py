@@ -6,7 +6,8 @@ from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 from config import pupil_data_repo, bot
 from phrases import PUPIL_AGE, PUPIL_ERROR_AGE, SCHOOL_TYPE, SCHOOL_REQUEST, ERROR_SCHOOL, GRADE_REQUEST, ERROR_GRADE, \
     EXAM_REQUEST, UNIVERSITY_REQUEST, ERROR_BUTTON, UNIVERSITY_LIST_REQUEST, GUIDE_UNIVERSITY, ERROR_UNIVERSITY, \
-    PUPIL_Q1, PUPIL_Q2, PUPIL_Q3, PUPIL_Q4, PUPIL_Q5, PUPIL_Q6, PUPIL_THX_7
+    PUPIL_Q1, PUPIL_Q2, PUPIL_Q3, PUPIL_Q4, PUPIL_Q5, PUPIL_Q6, PUPIL_THX_7, PUPIL_THX_9, PUPIL_THX
+from src.keyboards.parent_keyboards import keyboard_check_group_parents, check_group_buttons
 from src.keyboards.pupil_keyboard import pupil_age_keyboard, pupil_school_type_keyboard, school_types_buttons, \
     lyceum_keyboard, gymnasium_keyboard, school_keyboard, school_buttons, gymnasium_buttons, lyceum_buttons, \
     grade_keyboard, request_keyboard, answer_buttons, university_keyboard, university_list, keyboard_q3, keyboard_q5, \
@@ -197,7 +198,7 @@ async def handle_pupil_university(message: Message, state: FSMContext):
         pupil_data_repo.update_field(chat_id, "arrival", arrival)
         if arrival == answer_buttons[0]:
             await state.set_state(Pupil.wait_university)
-            await state.update_data(check_list=set())
+            await state.update_data(check_list=list())
             await bot.send_message(
                 chat_id=chat_id,
                 text=UNIVERSITY_LIST_REQUEST,
@@ -221,12 +222,13 @@ async def handle_pupil_university(message: Message, state: FSMContext):
             text=ERROR_BUTTON
         )
 
+
 @pupil_router.callback_query(StateFilter(Pupil.wait_university), F.data == "next")
 async def handle_check_university_next(callback: CallbackQuery, state: FSMContext):
     chat_id = callback.message.chat.id
     try:
         state_data = await state.get_data()
-        check_list = state_data['check_list']
+        check_list = set(state_data['check_list'])
     except:
         check_list = set()
     if len(check_list) == 0:
@@ -260,13 +262,14 @@ async def handle_check_university(callback: CallbackQuery, state: FSMContext):
     university = callback.data
     try:
         state_data = await state.get_data()
-        check_list = state_data['check_list']
+        check_list = set(state_data['check_list'])
     except:
         check_list = set()
     if int(university) in check_list:
         check_list.remove(int(university))
     else:
         check_list.add(int(university))
+    await state.update_data(check_list=list(check_list))
     await bot.edit_message_reply_markup(
         chat_id=chat_id,
         message_id=callback.message.message_id,
@@ -383,9 +386,23 @@ async def handle_pupil_q5(message: Message, state: FSMContext):
     if answer in answer_q6:
         await state.set_state(Pupil.end)
         pupil_data_repo.update_field(chat_id, "project_IT", answer)
+        # pupil_data = pupil_data_repo.get_user_by_chat_id(chat_id)
+        # pupil_data = pupil_data.data[0]
+        # if pupil_data['grade'] < 5:
+        #     await bot.send_message(
+        #         chat_id=chat_id,
+        #         text=PUPIL_THX_7,
+        #         reply_markup=keyboard_check_group_parents()
+        #     )
+        # else:
+        #     await bot.send_message(
+        #         chat_id=chat_id,
+        #         text=PUPIL_THX_9,
+        #         reply_markup=keyboard_check_group_parents()
+        #     )
         await bot.send_message(
             chat_id=chat_id,
-            text=PUPIL_THX_7,
+            text=PUPIL_THX,
             reply_markup=ReplyKeyboardRemove()
         )
 
@@ -394,3 +411,7 @@ async def handle_pupil_q5(message: Message, state: FSMContext):
             chat_id=chat_id,
             text=ERROR_BUTTON
         )
+
+
+# @pupil_router.message(StateFilter(Pupil.wait_group), F.text == check_group_buttons["present"])
+# async def handle_pupil_check_group(message: Message, state: FSMContext):

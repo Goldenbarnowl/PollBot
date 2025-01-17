@@ -10,7 +10,7 @@ from phrases import PCHILDREN_NAME, ERROR_PCHILDREN, SCHOOL_TYPE, PUPIL_ERROR_AG
     GRADE_REQUEST, ERROR_SCHOOL, EXAM_REQUEST, ERROR_GRADE, UNIVERSITY_REQUEST, ERROR_BUTTON, UNIVERSITY_LIST_REQUEST, \
     GUIDE_UNIVERSITY, PUPIL_Q2, ERROR_UNIVERSITY, PUPIL_Q1, PUPIL_Q6, PUPIL_Q5, PUPIL_Q4, PUPIL_Q3, \
     PCHILDREN_AGE, PARENT_GRADE_REQUEST, PARENTS_Q2, PARENTS_Q3, NEW_CHILDREN, PARENTS_Q5, PARENTS_Q6, PARENTS_Q7, \
-    PARENTS_Q9, PARENTS_Q8, THX_PARENTS, REPEAT_PARENTS, PARENT_PRESENT, PARENT_GIVE
+    PARENTS_Q9, PARENTS_Q8, THX_PARENTS, REPEAT_PARENTS, PARENT_PRESENT, PARENT_GIVE, THX_PARENTS_END
 from src.keyboards.parent_keyboards import new_children_keyboard, new_children_buttons, keyboard_q5_parents, \
     keyboard_q6_parents, parents_answer_q6, keyboard_q7_parents, parents_answer_q9, parents_answer_q8, \
     keyboard_q9_parents, keyboard_q8_parents, parents_answer_q7, keyboard_check_group_parents, check_group_buttons, \
@@ -224,7 +224,7 @@ async def handle_parent_university(message: Message, state: FSMContext):
         pchildren_data_repo.update_field(chat_id, "arrival", arrival)
         if arrival == answer_buttons[0]:
             await state.set_state(Parent.wait_university)
-            await state.update_data(check_list=set())
+            await state.update_data(check_list=list())
             await bot.send_message(
                 chat_id=chat_id,
                 text=UNIVERSITY_LIST_REQUEST,
@@ -254,7 +254,7 @@ async def handle_check_university_next(callback: CallbackQuery, state: FSMContex
     chat_id = callback.message.chat.id
     try:
         state_data = await state.get_data()
-        check_list = state_data['check_list']
+        check_list = set(state_data['check_list'])
     except:
         check_list = set()
     if len(check_list) == 0:
@@ -288,13 +288,14 @@ async def handle_check_university(callback: CallbackQuery, state: FSMContext):
     university = callback.data
     try:
         state_data = await state.get_data()
-        check_list = state_data['check_list']
+        check_list = set(state_data['check_list'])
     except:
         check_list = set()
     if int(university) in check_list:
         check_list.remove(int(university))
     else:
         check_list.add(int(university))
+    await state.update_data(check_list=check_list)
     await bot.edit_message_reply_markup(
         chat_id=chat_id,
         message_id=callback.message.message_id,
@@ -466,11 +467,12 @@ async def handle_parent_q9(message: Message, state: FSMContext):
         parent_data_repo.update_field(chat_id, "useful_skills", answer)
         await bot.send_message(
             chat_id=chat_id,
-            text=THX_PARENTS,
-            reply_markup=keyboard_check_group_parents()
+            text=THX_PARENTS_END,
+            # reply_markup=keyboard_check_group_parents()
+            reply_markup=ReplyKeyboardRemove()
         )
 
-        await state.set_state(Parent.wait_group)
+        await state.set_state(Parent.end)
     else:
         await bot.send_message(
             chat_id=chat_id,
@@ -478,65 +480,65 @@ async def handle_parent_q9(message: Message, state: FSMContext):
         )
 
 
-@parent_router.message(StateFilter(Parent.wait_group), F.text == check_group_buttons["present"])
-async def handle_parent_wait_group(message: Message, state: FSMContext):
-    chat_id = message.chat.id
-    # Проверяем статус пользователя в канале
-    chat_member = await bot.get_chat_member(chat_id=channel_id, user_id=chat_id)
-
-    if chat_member.status in ['member', 'administrator', 'creator']:
-        try:
-            # Отправка подарка
-            await bot.send_message(
-                chat_id=chat_id,
-                text=PARENT_PRESENT,
-                reply_markup=keyboard_check_present_parents()
-            )
-            await bot.send_message(
-                chat_id=admin_group,
-                message_thread_id=group_thread,
-                text=f"Пользователь {str(chat_id)} - @{message.from_user.username} подписался на группу!"
-            )
-            await state.set_state(Parent.wait_present)
-        except:
-            pass
-    else:
-        try:
-            await bot.send_message(chat_id=chat_id,
-                                   text=REPEAT_PARENTS
-                                   )
-        except:
-            pass
-
-
-@parent_router.message(StateFilter(Parent.wait_present), F.text == check_group_buttons["give_me"])
-async def handle_parent_wait_present(message: Message, state: FSMContext):
-    chat_id = message.chat.id
-    await bot.send_message(
-        chat_id=chat_id,
-        text=PARENT_GIVE,
-        reply_markup=ReplyKeyboardRemove()
-    )
-    await state.clear()
-    parent_data = parent_data_repo.get_user_by_chat_id(chat_id)
-    parent_data = parent_data.data[0]
-    pchildren_data = pchildren_data_repo.get_user_by_chat_id_all(chat_id)
-    pchildren_data = pchildren_data.data
-    text = f"Пользователь {str(chat_id)} - @{message.from_user.username} хочет получить подарок!\n\nДанные пользователя:\n"
-    for key, value in parent_data.items():
-        text += f"{key.replace('_', ' ').capitalize()}: {value}\n"
-    await bot.send_message(
-        chat_id=admin_group,
-        message_thread_id=present_thread,
-        text=text
-    )
-    text = "Дети:\n"
-    for pchildren in pchildren_data:
-        for key, value in pchildren.items():
-            text += f"{key.replace('_', ' ').capitalize()}: {value}\n"
-        await bot.send_message(
-            chat_id=admin_group,
-            message_thread_id=present_thread,
-            text=text
-        )
-        text = ""
+# @parent_router.message(StateFilter(Parent.wait_group), F.text == check_group_buttons["present"])
+# async def handle_parent_wait_group(message: Message, state: FSMContext):
+#     chat_id = message.chat.id
+#     # Проверяем статус пользователя в канале
+#     chat_member = await bot.get_chat_member(chat_id=channel_id, user_id=chat_id)
+#
+#     if chat_member.status in ['member', 'administrator', 'creator']:
+#         try:
+#             # Отправка подарка
+#             await bot.send_message(
+#                 chat_id=chat_id,
+#                 text=PARENT_PRESENT,
+#                 reply_markup=keyboard_check_present_parents()
+#             )
+#             await bot.send_message(
+#                 chat_id=admin_group,
+#                 message_thread_id=group_thread,
+#                 text=f"Пользователь {str(chat_id)} - @{message.from_user.username} подписался на группу!"
+#             )
+#             await state.set_state(Parent.wait_present)
+#         except:
+#             pass
+#     else:
+#         try:
+#             await bot.send_message(chat_id=chat_id,
+#                                    text=REPEAT_PARENTS
+#                                    )
+#         except:
+#             pass
+#
+#
+# @parent_router.message(StateFilter(Parent.wait_present), F.text == check_group_buttons["give_me"])
+# async def handle_parent_wait_present(message: Message, state: FSMContext):
+#     chat_id = message.chat.id
+#     await bot.send_message(
+#         chat_id=chat_id,
+#         text=PARENT_GIVE,
+#         reply_markup=ReplyKeyboardRemove()
+#     )
+#     await state.clear()
+#     parent_data = parent_data_repo.get_user_by_chat_id(chat_id)
+#     parent_data = parent_data.data[0]
+#     pchildren_data = pchildren_data_repo.get_user_by_chat_id_all(chat_id)
+#     pchildren_data = pchildren_data.data
+#     text = f"Пользователь {str(chat_id)} - @{message.from_user.username} хочет получить подарок!\n\nДанные пользователя:\n"
+#     for key, value in parent_data.items():
+#         text += f"{key.replace('_', ' ').capitalize()}: {value}\n"
+#     await bot.send_message(
+#         chat_id=admin_group,
+#         message_thread_id=present_thread,
+#         text=text
+#     )
+#     text = "Дети:\n"
+#     for pchildren in pchildren_data:
+#         for key, value in pchildren.items():
+#             text += f"{key.replace('_', ' ').capitalize()}: {value}\n"
+#         await bot.send_message(
+#             chat_id=admin_group,
+#             message_thread_id=present_thread,
+#             text=text
+#         )
+#         text = ""
