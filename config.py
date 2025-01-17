@@ -8,6 +8,7 @@ from supabase import Client, create_client
 from src.repo.PChildrenDataRepo import PChildrenDataRepository
 from src.repo.ParentDataRepo import ParentDataRepository
 from src.repo.PupilDataRepo import PupilDataRepository
+from src.repo.TeacherDataRepo import TeacherDataDataRepository
 from src.repo.UserDataRepo import UserDataRepository
 
 
@@ -27,8 +28,9 @@ secrets = Secrets()
 
 channel_id = -1002406861510  # -1002406861510  # Канал для проверки
 admin_group = -1002354205786  # Группа админов
-present_thread = 4  # ID треда с подарками
-group_thread = 5  # ID треда с подписками на группу
+pupil_thread = 5
+parent_thread = 4
+teacher_thread = 97
 
 # Инициализация подключения к базе данных Supabase
 url: str = secrets.supabase_url
@@ -41,6 +43,7 @@ users_data_repo = UserDataRepository(supabase)
 pupil_data_repo = PupilDataRepository(supabase)
 parent_data_repo = ParentDataRepository(supabase)
 pchildren_data_repo = PChildrenDataRepository(supabase)
+teacher_data_repo = TeacherDataDataRepository(supabase)
 
 # Инициализация бота
 default = DefaultBotProperties(parse_mode='HTML', protect_content=False)

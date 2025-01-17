@@ -3,7 +3,7 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 
-from config import pupil_data_repo, bot
+from config import pupil_data_repo, bot, admin_group, pupil_thread, users_data_repo
 from phrases import PUPIL_AGE, PUPIL_ERROR_AGE, SCHOOL_TYPE, SCHOOL_REQUEST, ERROR_SCHOOL, GRADE_REQUEST, ERROR_GRADE, \
     EXAM_REQUEST, UNIVERSITY_REQUEST, ERROR_BUTTON, UNIVERSITY_LIST_REQUEST, GUIDE_UNIVERSITY, ERROR_UNIVERSITY, \
     PUPIL_Q1, PUPIL_Q2, PUPIL_Q3, PUPIL_Q4, PUPIL_Q5, PUPIL_Q6, PUPIL_THX_7, PUPIL_THX_9, PUPIL_THX
@@ -13,6 +13,7 @@ from src.keyboards.pupil_keyboard import pupil_age_keyboard, pupil_school_type_k
     grade_keyboard, request_keyboard, answer_buttons, university_keyboard, university_list, keyboard_q3, keyboard_q5, \
     keyboard_q6, answer_q3, keyboard_q4, answer_q4, answer_q5, answer_q6
 from src.keyboards.user_keyboards import role_buttons
+from src.routers.last_stand import db_checker
 from src.states.pupil_states import Pupil
 from src.states.user_states import User
 
@@ -39,6 +40,7 @@ async def handle_pupil_role(message: Message, state: FSMContext):
         text=PUPIL_AGE,
         reply_markup=pupil_age_keyboard()
     )
+    await db_checker(message)
 
 
 @pupil_router.message(StateFilter(Pupil.wait_age))
@@ -386,25 +388,46 @@ async def handle_pupil_q5(message: Message, state: FSMContext):
     if answer in answer_q6:
         await state.set_state(Pupil.end)
         pupil_data_repo.update_field(chat_id, "project_IT", answer)
-        # pupil_data = pupil_data_repo.get_user_by_chat_id(chat_id)
-        # pupil_data = pupil_data.data[0]
-        # if pupil_data['grade'] < 5:
-        #     await bot.send_message(
-        #         chat_id=chat_id,
-        #         text=PUPIL_THX_7,
-        #         reply_markup=keyboard_check_group_parents()
-        #     )
-        # else:
-        #     await bot.send_message(
-        #         chat_id=chat_id,
-        #         text=PUPIL_THX_9,
-        #         reply_markup=keyboard_check_group_parents()
-        #     )
         await bot.send_message(
             chat_id=chat_id,
             text=PUPIL_THX,
             reply_markup=ReplyKeyboardRemove()
         )
+
+        user_data = users_data_repo.get_user_by_chat_id(chat_id)
+        user_data = user_data.data[0]
+        pupil_data = pupil_data_repo.get_user_by_chat_id(chat_id)
+        pupil_data = pupil_data.data[0]
+        try:
+            text = (f"Пользователь {message.chat.id} - @{message.from_user.username}"
+                    f"\nФИО: {user_data['name']}"
+                    f"\nРоль: {message.text}"
+                    f"\nТелефон: +{user_data['tg_phone']}"
+                    f"\n-------------------"
+                    f"Возраст {pupil_data['age']}"
+                    f"\nШкола: {pupil_data['school']}"
+                    f"\nКласс: {pupil_data['grade']}"
+                    f"\nЕГЭ/ОГЭ {pupil_data['exam']}"
+                    f"\nПостуление в ВУЗ: {pupil_data['arrival']}"
+                    f"\nУниверситеты: {pupil_data['university']}"
+                    f"\nТехническая специальность: {pupil_data['technical_specialty']}"
+                    f"\nСвязать жизнь с IT: {pupil_data['IT_live']}"
+                    f"\nИнтерес к IT: {pupil_data['interested_IT']}"
+                    f"\nИнтерес к IT новостям: {pupil_data['learn_IT']}"
+                    f"\nЛюбимый язык: {pupil_data['make_IT']}"
+                    f"\nХочет создать: {pupil_data['project_IT']}")
+            await bot.edit_message_text(
+                chat_id=admin_group,
+                message_id=user_data['message'],
+                text=text)
+        except Exception as e:
+            print(e)
+            for line in text.split("\n"):
+                await bot.send_message(chat_id=admin_group,
+                                       message_thread_id=pupil_thread,
+                                       text=line
+                                       )
+
 
     else:
         await bot.send_message(
@@ -412,6 +435,3 @@ async def handle_pupil_q5(message: Message, state: FSMContext):
             text=ERROR_BUTTON
         )
 
-
-# @pupil_router.message(StateFilter(Pupil.wait_group), F.text == check_group_buttons["present"])
-# async def handle_pupil_check_group(message: Message, state: FSMContext):

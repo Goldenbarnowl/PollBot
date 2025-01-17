@@ -71,21 +71,20 @@ async def handle_contact(message: Message, state: FSMContext):
 async def handle_name(message: Message, state: FSMContext):
     """Обрабатывает имя пользователя"""
 
-    await state.set_state(User.wait_role)
-
     chat_id = message.chat.id
     name = message.text
 
-    if name:
+    if name and len(name) <= 50:
         users_data_repo.update_field(chat_id, "name", name)
+        await state.set_state(User.wait_role)
+        await bot.send_message(
+            chat_id=chat_id,
+            text=YOU_ROLE,
+            reply_markup=role_keyboard()
+        )
     else:
         await bot.send_message(
             chat_id=chat_id,
-            text=ERROR_NAME
+            text=ERROR_NAME if not name else "Имя не должно превышать 50 символов."
         )
-    await bot.send_message(
-        chat_id=chat_id,
-        text=YOU_ROLE,
-        reply_markup=role_keyboard()
-    )
 

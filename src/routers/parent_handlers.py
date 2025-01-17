@@ -4,8 +4,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 from aiogram.utils.markdown import hlink
 
-from config import parent_data_repo, pupil_data_repo, bot, pchildren_data_repo, channel_id, admin_group, group_thread, \
-    present_thread
+from config import parent_data_repo, pupil_data_repo, bot, pchildren_data_repo, admin_group, parent_thread, \
+    users_data_repo
 from phrases import PCHILDREN_NAME, ERROR_PCHILDREN, SCHOOL_TYPE, PUPIL_ERROR_AGE, PARENT_SCHOOL_TYPE, SCHOOL_REQUEST, \
     GRADE_REQUEST, ERROR_SCHOOL, EXAM_REQUEST, ERROR_GRADE, UNIVERSITY_REQUEST, ERROR_BUTTON, UNIVERSITY_LIST_REQUEST, \
     GUIDE_UNIVERSITY, PUPIL_Q2, ERROR_UNIVERSITY, PUPIL_Q1, PUPIL_Q6, PUPIL_Q5, PUPIL_Q4, PUPIL_Q3, \
@@ -20,6 +20,7 @@ from src.keyboards.pupil_keyboard import pupil_school_type_keyboard, school_type
     request_keyboard, answer_buttons, university_keyboard, university_list, answer_q6, keyboard_q6, answer_q5, \
     keyboard_q5, answer_q4, keyboard_q4, answer_q3, keyboard_q3, pupil_age_keyboard
 from src.keyboards.user_keyboards import role_buttons
+from src.routers.last_stand import db_checker
 from src.states.parent_states import Parent
 from src.states.user_states import User
 
@@ -46,6 +47,7 @@ async def handle_parent_role(message: Message, state: FSMContext):
         text=PCHILDREN_NAME,
         reply_markup=ReplyKeyboardRemove()
     )
+    await db_checker(message)
 
 
 @parent_router.message(StateFilter(Parent.wait_children_name))
@@ -473,6 +475,51 @@ async def handle_parent_q9(message: Message, state: FSMContext):
         )
 
         await state.set_state(Parent.end)
+
+        user_data = users_data_repo.get_user_by_chat_id(chat_id)
+        user_data = user_data.data[0]
+        parent_data = parent_data_repo.get_user_by_chat_id(chat_id)
+        parent_data = parent_data.data[0]
+        pchildren_data = pchildren_data_repo.get_user_by_chat_id_all(chat_id)
+        pchildren_data = pchildren_data.data
+        try:
+            await bot.delete_message(
+                chat_id=admin_group,
+                message_id=user_data['message']
+            )
+            text = (f"Пользователь {message.chat.id} - @{message.from_user.username}"
+                    f"\nФИО: {user_data['name']}"
+                    f"\nРоль: {'👨‍👩‍👧‍👦 Родитель'}"
+                    f"\nТелефон: +{user_data['tg_phone']}"
+                    f"\nПоддержка ребенка в IT: {parent_data['support_children']}"
+                    f"\nОпыт в IT: {parent_data['it_experience']}"
+                    f"\nПреимущества ребенка в IT: {parent_data['child_advantages']}"
+                    f"\nПолезные навыки в IT: {parent_data['useful_skills']}"
+                    )
+            await bot.send_message(
+                chat_id=admin_group,
+                message_thread_id=parent_thread,
+                text=text
+            )
+            for pchildren in pchildren_data:
+                text = (f"Родитель: {pchildren['chat_id']} - @{message.from_user.username}"
+                        f"\nИмя ребенка: {pchildren['children_name']}"
+                        f"\nВозраст: {pchildren['age']}"
+                        f"\nШкола: {pchildren['school']}"
+                        f"\nКласс: {pchildren['grade']}"
+                        f"\nЕГЭ/ОГЭ: {pchildren['exam']}"
+                        f"\nПоступление в ВУЗ: {pchildren['arrival']}"
+                        f"\nУниверситеты: {pchildren['university']}"
+                        f"\nТехническая специальность: {pchildren['technical_specialty']}"
+                        f"\nСвязать жизнь с IT: {pchildren['IT_live']}"
+                        f"\nЗанимается ли ребенок IT: {pchildren['training_IT']}")
+                await bot.send_message(chat_id=admin_group,
+                                       message_thread_id=parent_thread,
+                                       text=text
+                                       )
+
+        except Exception as e:
+            print(e)
     else:
         await bot.send_message(
             chat_id=chat_id,

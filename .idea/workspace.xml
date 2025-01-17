@@ -4,18 +4,31 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bbb4328d-87fb-4035-a948-e27d617207e4" name="Changes" comment="Redis v3">
+    <list default="true" id="bbb4328d-87fb-4035-a948-e27d617207e4" name="Changes" comment="Redis v4">
+      <change afterPath="$PROJECT_DIR$/src/repo/TeacherDataRepo.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/routers/teacher_handlers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/states/teacher_state.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/phrases.py" beforeDir="false" afterPath="$PROJECT_DIR$/phrases.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/keyboards/user_keyboards.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/keyboards/user_keyboards.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/repo/PupilDataRepo.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/repo/PupilDataRepo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/routers/last_stand.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/routers/last_stand.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/routers/parent_handlers.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/routers/parent_handlers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/routers/pupil_handlers.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/routers/pupil_handlers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/states/pupil_states.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/states/pupil_states.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -118,7 +131,15 @@
       <option name="project" value="LOCAL" />
       <updated>1736929415756</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Redis v4">
+      <option name="closed" value="true" />
+      <created>1737097927146</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1737097927146</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -148,6 +169,7 @@
     <MESSAGE value="Redis test" />
     <MESSAGE value="Redis v2" />
     <MESSAGE value="Redis v3" />
-    <option name="LAST_COMMIT_MESSAGE" value="Redis v3" />
+    <MESSAGE value="Redis v4" />
+    <option name="LAST_COMMIT_MESSAGE" value="Redis v4" />
   </component>
 </project>
