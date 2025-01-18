@@ -401,10 +401,10 @@ async def handle_pupil_q5(message: Message, state: FSMContext):
         try:
             text = (f"Пользователь {message.chat.id} - @{message.from_user.username}"
                     f"\nФИО: {user_data['name']}"
-                    f"\nРоль: {message.text}"
+                    f"\nРоль: {role_buttons['pupil']}"
                     f"\nТелефон: +{user_data['tg_phone']}"
                     f"\n-------------------"
-                    f"Возраст {pupil_data['age']}"
+                    f"\nВозраст {pupil_data['age']}"
                     f"\nШкола: {pupil_data['school']}"
                     f"\nКласс: {pupil_data['grade']}"
                     f"\nЕГЭ/ОГЭ {pupil_data['exam']}"

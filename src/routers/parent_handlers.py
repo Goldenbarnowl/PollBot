@@ -489,7 +489,7 @@ async def handle_parent_q9(message: Message, state: FSMContext):
             )
             text = (f"Пользователь {message.chat.id} - @{message.from_user.username}"
                     f"\nФИО: {user_data['name']}"
-                    f"\nРоль: {'👨‍👩‍👧‍👦 Родитель'}"
+                    f"\nРоль: {role_buttons['parent']}"
                     f"\nТелефон: +{user_data['tg_phone']}"
                     f"\nПоддержка ребенка в IT: {parent_data['support_children']}"
                     f"\nОпыт в IT: {parent_data['it_experience']}"

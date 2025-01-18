@@ -214,7 +214,7 @@ async def handle_teacher_q5(message: Message, state: FSMContext):
     try:
         text = (f"Пользователь {message.chat.id} - @{message.from_user.username}"
                 f"\nФИО: {user_data['name']}"
-                f"\nРоль: {message.text}"
+                f"\nРоль: {role_buttons['teacher']}"
                 f"\nТелефон: +{user_data['tg_phone']}"
                 f"\n-------------------"
                 f"\nКонтактные данные: {teacher_data['contact_data']}"
