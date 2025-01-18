@@ -297,7 +297,7 @@ async def handle_check_university(callback: CallbackQuery, state: FSMContext):
         check_list.remove(int(university))
     else:
         check_list.add(int(university))
-    await state.update_data(check_list=check_list)
+    await state.update_data(check_list=list(check_list))
     await bot.edit_message_reply_markup(
         chat_id=chat_id,
         message_id=callback.message.message_id,
