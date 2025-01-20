@@ -15,7 +15,7 @@ services:
       - .:/app
     command: ["python3", "main.py"]
 
-   redis:
+  redis:
     image: redis:latest
     container_name: redis_container
     restart: always
@@ -24,7 +24,8 @@ services:
     volumes:
       - redis_data:/data
       - ./redis.conf:/usr/local/etc/redis/redis.conf
-    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
 
 volumes:
   redis_data:
+
