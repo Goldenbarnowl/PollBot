@@ -97,13 +97,13 @@ async def handle_teacher_school(message: Message, state: FSMContext):
 
     if (school in school_buttons) or (school in gymnasium_buttons) or (school in lyceum_buttons):
 
-        await state.set_state(Teacher.wait_children_count)
+        await state.set_state(Teacher.wait_q1)
         teacher_data_repo.update_field(chat_id, "school", school)
 
         await bot.send_message(
             chat_id=chat_id,
-            text=TEACHER_CHILDREN_COUNT,
-            reply_markup=ReplyKeyboardRemove()
+            text=TEACHER_Q1,
+            reply_markup=request_keyboard()
         )
 
     else:
@@ -111,22 +111,6 @@ async def handle_teacher_school(message: Message, state: FSMContext):
             chat_id=chat_id,
             text=ERROR_SCHOOL
         )
-
-
-@teacher_router.message(StateFilter(Teacher.wait_children_count), F.text.isdigit())
-async def handle_teacher_children_count(message: Message, state: FSMContext):
-    """Обрабатывает количество детей в классах"""
-
-    chat_id = message.chat.id
-    children_count = message.text
-    teacher_data_repo.update_field(chat_id, "children_count", children_count)
-
-    await state.set_state(Teacher.wait_q1)
-    await bot.send_message(
-        chat_id=chat_id,
-        text=TEACHER_Q1,
-        reply_markup=request_keyboard()
-    )
 
 
 @teacher_router.message(StateFilter(Teacher.wait_q1), F.text.in_(answer_buttons))
@@ -219,7 +203,6 @@ async def handle_teacher_q5(message: Message, state: FSMContext):
                 f"\n-------------------"
                 f"\nКонтактные данные: {teacher_data['contact_data']}"
                 f"\nШкола: {teacher_data['school']}"
-                f"\nКоличество детей: {teacher_data['children_count']}"
                 f"\nЗаинтересованные ученики: {teacher_data['interested_child']}"
                 f"\nIT мероприятия: {teacher_data['it_measure']}"
                 f"\nНаличие оборудывания в школе: {teacher_data['equipping_situation']}"
